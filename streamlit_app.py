@@ -1,31 +1,86 @@
-# Streamlitライブラリをインポート
 import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
 
-# ページ設定（タブに表示されるタイトル、表示幅）
-st.set_page_config(page_title="タイトル", layout="wide")
+st.set_page_config(page_title="散布図と回帰直線", layout="wide")
 
-# タイトルを設定
-st.title('Streamlitのサンプルアプリ')
+st.title("散布図と回帰直線")
+st.caption("Created by Dit-Lab.(Daiki Ito)")
+st.write("ExcelまたはCSVファイルをアップロードしてください。2つの変数の散布図を作成し、回帰直線を引き、\( y = ax + b \) の式を表示します。")
+st.write("相関係数も表示されます。")
+st.write("")
 
-# テキスト入力ボックスを作成し、ユーザーからの入力を受け取る
-user_input = st.text_input('あなたの名前を入力してください')
+# ファイルアップローダー
+uploaded_file = st.file_uploader('ファイルをアップロードしてください (Excel or CSV)', type=['xlsx', 'csv'])
 
-# ボタンを作成し、クリックされたらメッセージを表示
-if st.button('挨拶する'):
-    if user_input:  # 名前が入力されているかチェック
-        st.success(f'🌟 こんにちは、{user_input}さん! 🌟')  # メッセージをハイライト
+# デモデータを使うかどうかのチェックボックス
+use_demo_data = st.checkbox('デモデータを使用')
+
+if use_demo_data:
+    # デモデータを読み込む
+    df = pd.read_excel('scatter_reg.xlsx')
+    st.write("デモデータの先頭5行を表示します:")
+    st.write(df.head())
+elif uploaded_file is not None:
+    if uploaded_file.type == 'text/csv':
+        df = pd.read_csv(uploaded_file)
+        st.write("データの先頭5行を表示します:")
+        st.write(df.head())
     else:
-        st.error('名前を入力してください。')  # エラーメッセージを表示
+        df = pd.read_excel(uploaded_file)
+        st.write("データの先頭5行を表示します:")
+        st.write(df.head())
+else:
+    df = None
 
-# スライダーを作成し、値を選択
-number = st.slider('好きな数字（10進数）を選んでください', 0, 100)
+if df is not None:
+    # 数値変数の抽出
+    numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
 
-# 補足メッセージ
-st.caption("十字キー（左右）でも調整できます。")
+    if len(numerical_cols) >= 2:
+        st.subheader('散布図の作成')
 
-# 選択した数字を表示
-st.write(f'あなたが選んだ数字は「{number}」です。')
+        # 数値変数の選択
+        x_var = st.selectbox('X軸の変数を選択してください:', numerical_cols, index=0)
+        y_var = st.selectbox('Y軸の変数を選択してください:', numerical_cols, index=1)
 
-# 選択した数値を2進数に変換
-binary_representation = bin(number)[2:]  # 'bin'関数で2進数に変換し、先頭の'0b'を取り除く
-st.info(f'🔢 10進数の「{number}」を2進数で表現すると「{binary_representation}」になります。 🔢')  # 2進数の表示をハイライト
+        if x_var and y_var:
+            x = df[x_var]
+            y = df[y_var]
+
+            # 欠損値を含む行を削除
+            data = df[[x_var, y_var]].dropna()
+            x = data[x_var]
+            y = data[y_var]
+
+            # 回帰直線の計算
+            slope, intercept = np.polyfit(x, y, 1)
+            line = slope * x + intercept
+
+            # 相関係数の計算
+            corr_coef = x.corr(y)
+
+            # 散布図と回帰直線のプロット
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=x, y=y, mode='markers', name='データ点'))
+            fig.add_trace(go.Scatter(x=x, y=line, mode='lines', name='回帰直線'))
+
+            fig.update_layout(
+                title=f'散布図と回帰直線： {y_var} vs {x_var}',
+                xaxis_title=x_var,
+                yaxis_title=y_var
+            )
+
+            st.plotly_chart(fig)
+
+            # 回帰式と相関係数の表示
+            st.write(f'回帰式: **{y_var} = {slope:.3f} × {x_var} + {intercept:.3f}**')
+            st.write(f'相関係数: **{corr_coef:.3f}**')
+        else:
+            st.write("X軸とY軸の変数を選択してください。")
+    else:
+        st.write("数値変数が2つ以上必要です。")
+else:
+    pass
