@@ -1,116 +1,151 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 import numpy as np
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
-st.set_page_config(page_title="散布図と回帰直線", layout="wide")
+st.set_page_config(page_title="散布図と回帰直線＋箱ひげ図", layout="wide")
 
-st.title("散布図と回帰直線")
-st.caption("Created by Dit-Lab.(Daiki Ito)")
-st.write("ExcelまたはCSVファイルをアップロードしてください。2つの変数の散布図を作成し、回帰直線を引き、\( y = ax + b \) の式を表示します。")
-st.write("相関係数も表示されます。")
+st.title("散布図と回帰直線＋箱ひげ図")
+st.caption("Created by 技術評論社")
+st.write("ExcelまたはCSVファイルをアップロードしてください。")
+st.write("2つの変数の散布図を作成し、回帰直線を引き、マージナル箱ひげ図を表示します。")
 st.write("")
 
 # ファイルアップローダー
 uploaded_file = st.file_uploader('ファイルをアップロードしてください (Excel or CSV)', type=['xlsx', 'csv'])
-
-# デモデータを使うかどうかのチェックボックス
 use_demo_data = st.checkbox('デモデータを使用')
 
 if use_demo_data:
     try:
         df = pd.read_excel('scatter_reg.xlsx')
-        st.write("デモデータの先頭5行を表示します:")
+        st.write("デモデータの先頭5行を表示:")
         st.write(df.head())
     except FileNotFoundError:
-        st.error("デモデータファイル 'scatter_reg.xlsx' が見つかりません。ファイルが存在することを確認してください。")
+        st.error("デモデータファイル 'scatter_reg.xlsx' が見つかりません。")
 elif uploaded_file is not None:
-    if uploaded_file.type == 'text/csv':
-        try:
+    try:
+        if uploaded_file.type == 'text/csv':
             df = pd.read_csv(uploaded_file)
-            st.write("データの先頭5行を表示します:")
-            st.write(df.head())
-        except Exception as e:
-            st.error(f"CSVファイルの読み込み中にエラーが発生しました: {e}")
-    else:
-        try:
+        else:
             df = pd.read_excel(uploaded_file)
-            st.write("データの先頭5行を表示します:")
-            st.write(df.head())
-        except Exception as e:
-            st.error(f"Excelファイルの読み込み中にエラーが発生しました: {e}")
+        st.write("アップロードデータの先頭5行を表示:")
+        st.write(df.head())
+    except Exception as e:
+        st.error(f"ファイル読み込み中にエラー: {e}")
 else:
     df = None
     st.info("ファイルをアップロードするか、デモデータを使用してください。")
 
 if df is not None:
-    # 数値変数の抽出
+    # 数値列だけ抽出
     numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
-
-    if len(numerical_cols) >= 2:
-        st.subheader('散布図の作成')
-
-        # 数値変数の選択
+    if len(numerical_cols) < 2:
+        st.warning("数値変数が2つ以上必要です。")
+    else:
+        st.subheader("変数の選択")
         col1, col2 = st.columns(2)
         with col1:
-            x_var = st.selectbox('X軸の変数を選択してください:', numerical_cols, index=0, key='x_var')
+            x_var = st.selectbox('X軸の変数を選択', numerical_cols, index=0)
         with col2:
-            y_var = st.selectbox('Y軸の変数を選択してください:', numerical_cols, index=1, key='y_var')
+            y_var = st.selectbox('Y軸の変数を選択', numerical_cols, index=1)
 
-        if x_var and y_var:
-            if x_var == y_var:
-                st.warning("同じ変数をX軸とY軸に選択しました。異なる変数を選択してください。")
+        if x_var == y_var:
+            st.warning("X軸とY軸には異なる変数を選択してください。")
+        else:
+            data = df[[x_var, y_var]].dropna()
+            if data.empty:
+                st.error("欠損値処理後、描画できるデータがありません。")
             else:
-                # データ抽出と欠損値処理
-                data = df[[x_var, y_var]].dropna()
                 x = data[x_var]
                 y = data[y_var]
 
-                if data.empty:
-                    st.error("選択された変数に欠損値が含まれており、プロットできるデータがありません。")
+                # 回帰直線
+                slope, intercept = np.polyfit(x, y, 1)
+                line = slope * x + intercept
+
+                # 相関係数
+                corr = x.corr(y)
+                abs_r = abs(corr)
+                if abs_r >= 0.9:
+                    strength = "非常に強い"
+                elif abs_r >= 0.7:
+                    strength = "強い"
+                elif abs_r >= 0.4:
+                    strength = "中程度の"
+                elif abs_r >= 0.2:
+                    strength = "弱い"
                 else:
-                    # 回帰直線の計算
-                    slope, intercept = np.polyfit(x, y, 1)
-                    line = slope * x + intercept
+                    strength = "ほとんど相関がない"
 
-                    # 相関係数の計算
-                    corr_coef = x.corr(y)
-                    abs_r = abs(corr_coef)
+                if abs_r >= 0.2:
+                    direction = "正の" if corr > 0 else "負の"
+                    corr_desc = f"{strength}{direction}相関"
+                else:
+                    corr_desc = strength
 
-                    # 相関の強弱と方向を判定（インラインで記述）
-                    if abs_r >= 0.9:
-                        strength = "非常に強い"
-                    elif abs_r >= 0.7:
-                        strength = "強い"
-                    elif abs_r >= 0.4:
-                        strength = "中程度の"
-                    elif abs_r >= 0.2:
-                        strength = "弱い"
-                    else:
-                        # ほとんど相関がない場合は符号付き表現を使わない
-                        corr_desc = "ほとんど相関がない"
-                    # ほとんど相関がない以外の場合のみ方向を付与
-                    if abs_r >= 0.2:
-                        direction = "正の相関" if corr_coef > 0 else "負の相関"
-                        corr_desc = f"{strength}{direction}"
+                # サブプロット作成：2行2列
+                fig = make_subplots(
+                    rows=2, cols=2,
+                    shared_xaxes=True, shared_yaxes=True,
+                    row_heights=[0.2, 0.8], column_widths=[0.8, 0.2],
+                    specs=[[{"type":"box"}, None],
+                           [{"type":"scatter"}, {"type":"box"}]],
+                    horizontal_spacing=0.02, vertical_spacing=0.02
+                )
 
-                    # 散布図と回帰直線のプロット
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(x=x, y=y, mode='markers', name='データ点'))
-                    fig.add_trace(go.Scatter(x=x, y=line, mode='lines', name='回帰直線'))
-                    fig.update_layout(
-                        title=f'散布図と回帰直線： {y_var} vs {x_var}',
-                        xaxis_title=x_var,
-                        yaxis_title=y_var
-                    )
-                    st.plotly_chart(fig)
+                # X軸分布の箱ひげ図（上段左）
+                fig.add_trace(
+                    go.Box(
+                        x=x,
+                        boxpoints=False,
+                        orientation='h',
+                        name=f'{x_var} の分布'
+                    ),
+                    row=1, col=1
+                )
 
-                    # 回帰式と相関係数の表示
-                    st.subheader(f'回帰式： y = {slope:.2f}x + {intercept:.2f}')
-                    st.write(f'「{y_var}」 = {slope:.2f} × 「{x_var}」 + {intercept:.2f}')
-                    st.subheader(f'相関係数： {corr_coef:.2f}')
-                    st.write(f"「{y_var}」 と 「{x_var}」 の間には、「{corr_desc}」があります。（r = {corr_coef:.2f}。")
-        else:
-            st.warning("X軸とY軸の変数を選択してください。")
-    else:
-        st.warning("数値変数が2つ以上必要です。")
+                # 散布図（下段左）
+                fig.add_trace(
+                    go.Scatter(
+                        x=x, y=y,
+                        mode='markers',
+                        name='データ点'
+                    ),
+                    row=2, col=1
+                )
+
+                # Y軸分布の箱ひげ図（下段右）
+                fig.add_trace(
+                    go.Box(
+                        y=y,
+                        boxpoints=False,
+                        name=f'{y_var} の分布'
+                    ),
+                    row=2, col=2
+                )
+
+                # 回帰直線を散布図に重ねる
+                fig.add_trace(
+                    go.Scatter(
+                        x=x, y=line,
+                        mode='lines',
+                        name='回帰直線'
+                    ),
+                    row=2, col=1
+                )
+
+                # マージナルプロットの軸ラベル非表示
+                fig.update_xaxes(showticklabels=False, row=1, col=1)
+                fig.update_yaxes(showticklabels=False, row=2, col=2)
+
+                fig.update_layout(
+                    height=600, width=800,
+                    title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
+                )
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                # 回帰式と相関
+                st.subheader(f"回帰式:  y = {slope:.2f}x + {intercept:.2f}")
+                st.write(f"相関係数: {corr:.2f} （{corr_desc}）")
