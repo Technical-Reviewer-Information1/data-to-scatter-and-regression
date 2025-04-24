@@ -86,7 +86,7 @@ if df is not None:
                 fig = make_subplots(
                     rows=2, cols=2,
                     row_heights=[0.75, 0.25],       # 下段を小さく
-                    column_widths=[0.25, 0.75],     # 左列を広げて間隔を確保
+                    column_widths=[0.35, 0.65],     # 左列を広げて間隔を確保
                     specs=[
                         [{"type":"box"},   {"type":"scatter"}],
                         [None,             {"type":"box"}]
@@ -138,14 +138,14 @@ if df is not None:
                     row=1, col=2
                 )
                 fig.update_yaxes(
-                    title=y_var, title_standoff=40,
+                    title=y_var, title_standoff=80,
                     row=1, col=2
                 )
 
                 # ─── レイアウト調整 ───
                 fig.update_layout(
                     height=650, width=900,
-                    margin=dict(l=160, r=40, t=80, b=120),
+                    margin=dict(l=200, r=40, t=80, b=120),
                     title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
                 )
 
