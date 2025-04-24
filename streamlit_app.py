@@ -124,8 +124,8 @@ if df is not None:
                                      row=r, col=c)
 
                 # 散布図側の軸タイトルを離す
-                fig.update_xaxes(title=x_var, title_standoff=40,
-                                 row=1, col=2)
+                fig.update_xaxes(title=x_var, title_standoff=20,
+                                 row=2, col=2)
                 fig.update_yaxes(title=y_var, title_standoff=120,
                                  row=1, col=2)
 
