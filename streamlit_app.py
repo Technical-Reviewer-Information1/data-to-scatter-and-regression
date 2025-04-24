@@ -83,7 +83,7 @@ if df is not None:
                 fig = make_subplots(
                     rows=2, cols=2,
                     row_heights=[0.8, 0.2],
-                    column_widths=[0.15, 0.85],  # ← 左を15%、右を85%
+                    column_widths=[0.1, 0.9],  # ← 左を15%、右を85%
                     specs=[
                         [{"type":"box"}, {"type":"scatter"}],
                         [None,             {"type":"box"}]
