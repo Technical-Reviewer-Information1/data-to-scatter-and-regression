@@ -4,9 +4,9 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="散布図と回帰直線", layout="wide")
+st.set_page_config(page_title="散布図と回帰直線＋箱ひげ図", layout="wide")
 
-st.title("散布図と回帰直線")
+st.title("散布図と回帰直線＋箱ひげ図")
 st.caption("Created by 技術評論社")
 st.write("ExcelまたはCSVファイルをアップロードしてください。")
 st.write("2つの変数の散布図を作成し、回帰直線を引き、マージナル箱ひげ図を表示します。")
@@ -164,15 +164,15 @@ if df is not None:
                     row=2, col=2
                 )
 
-                # 散布図側の軸タイトルと余白を調整
-                fig.update_xaxes(title_standoff=30, row=1, col=2)
-                fig.update_yaxes(title_standoff=30, row=1, col=2)
+                # 散布図側の軸タイトルをさらに離す
+                fig.update_xaxes(title_standoff=50, row=1, col=2)
+                fig.update_yaxes(title_standoff=50, row=1, col=2)
 
                 # レイアウト：大きさ・マージン・タイトル・軸ラベル
                 fig.update_layout(
                     height=600,
                     width=800,
-                    margin=dict(l=80, r=40, t=60, b=60),
+                    margin=dict(l=100, r=40, t=60, b=100),
                     title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）",
                     xaxis2_title=x_var,
                     yaxis2_title=y_var
