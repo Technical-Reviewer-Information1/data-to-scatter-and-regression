@@ -38,7 +38,6 @@ else:
     st.info("ファイルをアップロードするか、デモデータを使用してください。")
 
 if df is not None:
-    # 数値列だけ抽出
     numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
     if len(numerical_cols) < 2:
         st.warning("数値変数が2つ以上必要です。")
@@ -84,65 +83,54 @@ if df is not None:
                 else:
                     corr_desc = strength
 
-                # サブプロット作成：2行2列
+                # ★ここからマージナル箱ひげ図付きサブプロット★
                 fig = make_subplots(
                     rows=2, cols=2,
-                    shared_xaxes=True, shared_yaxes=True,
-                    row_heights=[0.2, 0.8], column_widths=[0.8, 0.2],
-                    specs=[[{"type":"box"}, None],
-                           [{"type":"scatter"}, {"type":"box"}]],
-                    horizontal_spacing=0.02, vertical_spacing=0.02
+                    row_heights=[0.8, 0.2],
+                    column_widths=[0.2, 0.8],
+                    specs=[
+                        [{"type": "box"}, {"type": "scatter"}],
+                        [None,          {"type": "box"}]
+                    ],
+                    horizontal_spacing=0.02,
+                    vertical_spacing=0.02
                 )
 
-                # X軸分布の箱ひげ図（上段左）
+                # Y軸分布の箱ひげ図（左上）
                 fig.add_trace(
-                    go.Box(
-                        x=x,
-                        boxpoints=False,
-                        orientation='h',
-                        name=f'{x_var} の分布'
-                    ),
+                    go.Box(y=y, boxpoints=False, orientation='v', name=f'{y_var} の分布'),
                     row=1, col=1
                 )
 
-                # 散布図（下段左）
+                # 散布図（右上）
                 fig.add_trace(
-                    go.Scatter(
-                        x=x, y=y,
-                        mode='markers',
-                        name='データ点'
-                    ),
-                    row=2, col=1
+                    go.Scatter(x=x, y=y, mode='markers', name='データ点'),
+                    row=1, col=2
+                )
+                # 回帰直線を散布図に重ねる
+                fig.add_trace(
+                    go.Scatter(x=x, y=line, mode='lines', name='回帰直線'),
+                    row=1, col=2
                 )
 
-                # Y軸分布の箱ひげ図（下段右）
+                # X軸分布の箱ひげ図（右下）
                 fig.add_trace(
-                    go.Box(
-                        y=y,
-                        boxpoints=False,
-                        name=f'{y_var} の分布'
-                    ),
+                    go.Box(x=x, boxpoints=False, orientation='h', name=f'{x_var} の分布'),
                     row=2, col=2
                 )
 
-                # 回帰直線を散布図に重ねる
-                fig.add_trace(
-                    go.Scatter(
-                        x=x, y=line,
-                        mode='lines',
-                        name='回帰直線'
-                    ),
-                    row=2, col=1
-                )
-
-                # マージナルプロットの軸ラベル非表示
+                # マージナル箱ひげ図の余分な目盛を非表示
                 fig.update_xaxes(showticklabels=False, row=1, col=1)
                 fig.update_yaxes(showticklabels=False, row=2, col=2)
 
+                # タイトルと散布図軸ラベル
                 fig.update_layout(
                     height=600, width=800,
-                    title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
+                    title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）",
+                    xaxis2_title=x_var,
+                    yaxis2_title=y_var
                 )
+                # ★ここまで★
 
                 st.plotly_chart(fig, use_container_width=True)
 
