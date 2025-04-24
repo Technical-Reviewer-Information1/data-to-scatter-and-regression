@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
@@ -19,7 +18,6 @@ uploaded_file = st.file_uploader('ファイルをアップロードしてくだ�
 use_demo_data = st.checkbox('デモデータを使用')
 
 if use_demo_data:
-    # デモデータを読み込む
     try:
         df = pd.read_excel('scatter_reg.xlsx')
         st.write("デモデータの先頭5行を表示します:")
@@ -63,10 +61,7 @@ if df is not None:
             if x_var == y_var:
                 st.warning("同じ変数をX軸とY軸に選択しました。異なる変数を選択してください。")
             else:
-                x = df[x_var]
-                y = df[y_var]
-
-                # 欠損値を含む行を削除
+                # データ抽出と欠損値処理
                 data = df[[x_var, y_var]].dropna()
                 x = data[x_var]
                 y = data[y_var]
@@ -80,27 +75,42 @@ if df is not None:
 
                     # 相関係数の計算
                     corr_coef = x.corr(y)
+                    abs_r = abs(corr_coef)
+
+                    # 相関の強弱と方向を判定（インラインで記述）
+                    if abs_r >= 0.9:
+                        strength = "非常に強い"
+                    elif abs_r >= 0.7:
+                        strength = "強い"
+                    elif abs_r >= 0.4:
+                        strength = "中程度の"
+                    elif abs_r >= 0.2:
+                        strength = "弱い"
+                    else:
+                        # ほとんど相関がない場合は符号付き表現を使わない
+                        corr_desc = "ほとんど相関がない"
+                    # ほとんど相関がない以外の場合のみ方向を付与
+                    if abs_r >= 0.2:
+                        direction = "正の相関" if corr_coef > 0 else "負の相関"
+                        corr_desc = f"{strength}{direction}"
 
                     # 散布図と回帰直線のプロット
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=x, y=y, mode='markers', name='データ点'))
                     fig.add_trace(go.Scatter(x=x, y=line, mode='lines', name='回帰直線'))
-
                     fig.update_layout(
                         title=f'散布図と回帰直線： {y_var} vs {x_var}',
                         xaxis_title=x_var,
                         yaxis_title=y_var
                     )
-
                     st.plotly_chart(fig)
 
                     # 回帰式と相関係数の表示
                     st.subheader(f'回帰式： y = {slope:.2f}x + {intercept:.2f}')
-                    st.write(f'回帰式（解釈）： {y_var} = {slope:.2f} × {x_var} + {intercept:.2f}')
+                    st.write(f'{y_var} = {slope:.2f} × {x_var} + {intercept:.2f}')
                     st.subheader(f'相関係数： {corr_coef:.2f}')
+                    st.write(f"{y_var} と {x_var} の間には、{corr_desc}（r = {corr_coef:.2f}）があります。")
         else:
             st.warning("X軸とY軸の変数を選択してください。")
     else:
         st.warning("数値変数が2つ以上必要です。")
-else:
-    pass
