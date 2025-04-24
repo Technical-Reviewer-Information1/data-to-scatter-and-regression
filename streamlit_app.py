@@ -83,39 +83,57 @@ if df is not None:
                 else:
                     corr_desc = strength
 
-                # ★ここからマージナル箱ひげ図付きサブプロット★
+                # マージナル箱ひげ図付きサブプロット
                 fig = make_subplots(
                     rows=2, cols=2,
                     row_heights=[0.8, 0.2],
                     column_widths=[0.2, 0.8],
                     specs=[
-                        [{"type": "box"}, {"type": "scatter"}],
-                        [None,          {"type": "box"}]
+                        [{"type":"box"},   {"type":"scatter"}],
+                        [None,             {"type":"box"}]
                     ],
                     horizontal_spacing=0.02,
                     vertical_spacing=0.02
                 )
 
-                # Y軸分布の箱ひげ図（左上）
+                # Y軸分布の箱ひげ図（左）
                 fig.add_trace(
-                    go.Box(y=y, boxpoints=False, orientation='v', name=f'{y_var} の分布'),
+                    go.Box(
+                        y=y,
+                        boxpoints=False,
+                        orientation='v',
+                        name=f'{y_var} の分布'
+                    ),
                     row=1, col=1
                 )
 
-                # 散布図（右上）
+                # 散布図（中央）
                 fig.add_trace(
-                    go.Scatter(x=x, y=y, mode='markers', name='データ点'),
+                    go.Scatter(
+                        x=x, y=y,
+                        mode='markers',
+                        name='データ点'
+                    ),
                     row=1, col=2
                 )
-                # 回帰直線を散布図に重ねる
+                # 回帰直線
                 fig.add_trace(
-                    go.Scatter(x=x, y=line, mode='lines', name='回帰直線'),
+                    go.Scatter(
+                        x=x, y=line,
+                        mode='lines',
+                        name='回帰直線'
+                    ),
                     row=1, col=2
                 )
 
-                # X軸分布の箱ひげ図（右下）
+                # X軸分布の箱ひげ図（下）
                 fig.add_trace(
-                    go.Box(x=x, boxpoints=False, orientation='h', name=f'{x_var} の分布'),
+                    go.Box(
+                        x=x,
+                        boxpoints=False,
+                        orientation='h',
+                        name=f'{x_var} の分布'
+                    ),
                     row=2, col=2
                 )
 
@@ -123,17 +141,16 @@ if df is not None:
                 fig.update_xaxes(showticklabels=False, row=1, col=1)
                 fig.update_yaxes(showticklabels=False, row=2, col=2)
 
-                # タイトルと散布図軸ラベル
+                # 軸ラベルとレイアウト調整
                 fig.update_layout(
                     height=600, width=800,
                     title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）",
                     xaxis2_title=x_var,
                     yaxis2_title=y_var
                 )
-                # ★ここまで★
 
                 st.plotly_chart(fig, use_container_width=True)
 
                 # 回帰式と相関
-                st.subheader(f"回帰式:  y = {slope:.2f}x + {intercept:.2f}")
+                st.subheader(f"回帰式: y = {slope:.2f}x + {intercept:.2f}")
                 st.write(f"相関係数: {corr:.2f} （{corr_desc}）")
