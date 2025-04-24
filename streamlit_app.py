@@ -12,7 +12,6 @@ st.write("ExcelまたはCSVファイルをアップロードしてください�
 st.write("2つの変数の散布図を作成し、回帰直線を引き、マージナル箱ひげ図を表示します。")
 st.write("")
 
-# ファイルアップローダー
 uploaded_file = st.file_uploader(
     "ファイルをアップロードしてください (Excel or CSV)",
     type=['xlsx', 'csv']
@@ -22,51 +21,49 @@ use_demo_data = st.checkbox('デモデータを使用')
 if use_demo_data:
     try:
         df = pd.read_excel('scatter_reg.xlsx')
-        st.write("デモデータの先頭5行を表示:")
         st.write(df.head())
     except FileNotFoundError:
-        st.error("デモデータファイル 'scatter_reg.xlsx' が見つかりません。")
+        st.error("デモデータ 'scatter_reg.xlsx' が見つかりません。")
 elif uploaded_file is not None:
     try:
         if uploaded_file.type == 'text/csv':
             df = pd.read_csv(uploaded_file)
         else:
             df = pd.read_excel(uploaded_file)
-        st.write("アップロードデータの先頭5行を表示:")
         st.write(df.head())
     except Exception as e:
-        st.error(f"ファイル読み込み中にエラー: {e}")
+        st.error(f"読み込みエラー: {e}")
 else:
     df = None
-    st.info("ファイルをアップロードするか、デモデータを使用してください。")
+    st.info("ファイルをアップロードしてください。")
 
 if df is not None:
-    numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
-    if len(numerical_cols) < 2:
-        st.warning("数値変数が2つ以上必要です。")
+    cols = df.select_dtypes(include='number').columns.tolist()
+    if len(cols) < 2:
+        st.warning("数値列が2つ以上必要です。")
     else:
-        st.subheader("変数の選択")
-        col1, col2 = st.columns(2)
-        with col1:
-            x_var = st.selectbox('X軸の変数を選択', numerical_cols, index=0)
-        with col2:
-            y_var = st.selectbox('Y軸の変数を選択', numerical_cols, index=1)
+        st.subheader("変数を選択")
+        c1, c2 = st.columns(2)
+        with c1:
+            x_var = st.selectbox("X軸", cols, index=0)
+        with c2:
+            y_var = st.selectbox("Y軸", cols, index=1)
 
         if x_var == y_var:
-            st.warning("X軸とY軸には異なる変数を選択してください。")
+            st.warning("異なる変数を選択してください。")
         else:
             data = df[[x_var, y_var]].dropna()
             if data.empty:
-                st.error("欠損値処理後、描画できるデータがありません。")
+                st.error("有効データがありません。")
             else:
                 x = data[x_var]
                 y = data[y_var]
 
-                # 回帰直線の計算
+                # 回帰直線
                 slope, intercept = np.polyfit(x, y, 1)
                 line = slope * x + intercept
 
-                # 相関係数の計算
+                # 相関
                 corr = x.corr(y)
                 abs_r = abs(corr)
                 if abs_r >= 0.9:
@@ -82,26 +79,26 @@ if df is not None:
                 corr_desc = (f"{strength}{'正の' if corr>0 else '負の'}相関"
                              if abs_r>=0.2 else strength)
 
-                # ─── マージナル箱ひげ図付きサブプロット ───
+                # サブプロット
                 fig = make_subplots(
                     rows=2, cols=2,
-                    row_heights=[0.75, 0.25],       # 下段を小さく
-                    column_widths=[0.35, 0.65],     # 左列を広げて間隔を確保
+                    row_heights=[0.8, 0.2],
+                    column_widths=[0.15, 0.85],  # ← 左を15%、右を85%
                     specs=[
-                        [{"type":"box"},   {"type":"scatter"}],
+                        [{"type":"box"}, {"type":"scatter"}],
                         [None,             {"type":"box"}]
                     ],
                     horizontal_spacing=0.02,
-                    vertical_spacing=0.15          # 上下間隔を広げる
+                    vertical_spacing=0.15
                 )
 
-                # 左上：Y軸箱ひげ図
+                # Y箱ひげ図（左上）
                 fig.add_trace(
                     go.Box(y=y, boxpoints=False, orientation='v',
-                           name=f'{y_var} の分布'),
+                           showlegend=False),
                     row=1, col=1
                 )
-                # 右上：散布図 + 回帰直線
+                # 散布図 + 回帰直線（右上）
                 fig.add_trace(
                     go.Scatter(x=x, y=y, mode='markers', name='データ点'),
                     row=1, col=2
@@ -110,47 +107,37 @@ if df is not None:
                     go.Scatter(x=x, y=line, mode='lines', name='回帰直線'),
                     row=1, col=2
                 )
-                # 右下：X軸箱ひげ図
+                # X箱ひげ図（右下）
                 fig.add_trace(
                     go.Box(x=x, boxpoints=False, orientation='h',
-                           name=f'{x_var} の分布'),
+                           showlegend=False),
                     row=2, col=2
                 )
 
-                # ─── marginal 箱ひげ図の軸を完全消去 ───
+                # marginal 箱ひげ図 の目盛・線を消去
                 for (r, c) in [(1,1), (2,2)]:
-                    fig.update_xaxes(
-                        showticklabels=False, showgrid=False,
-                        zeroline=False, showline=False,
-                        row=r, col=c
-                    )
-                    fig.update_yaxes(
-                        showticklabels=False, showgrid=False,
-                        zeroline=False, showline=False,
-                        row=r, col=c
-                    )
-                # 左上のY箱ひげ図のタイトルも消去
-                fig.update_yaxes(title_text='', row=1, col=1)
+                    fig.update_xaxes(showticklabels=False, showgrid=False,
+                                     zeroline=False, showline=False,
+                                     row=r, col=c)
+                    fig.update_yaxes(showticklabels=False, showgrid=False,
+                                     zeroline=False, showline=False,
+                                     row=r, col=c)
 
-                # ─── 散布図側の軸タイトルを離す ───
-                fig.update_xaxes(
-                    title=x_var, title_standoff=40,
-                    row=1, col=2
-                )
-                fig.update_yaxes(
-                    title=y_var, title_standoff=80,
-                    row=1, col=2
-                )
+                # 散布図側の軸タイトルを離す
+                fig.update_xaxes(title=x_var, title_standoff=40,
+                                 row=1, col=2)
+                fig.update_yaxes(title=y_var, title_standoff=60,
+                                 row=1, col=2)
 
-                # ─── レイアウト調整 ───
+                # レイアウト調整
                 fig.update_layout(
-                    height=650, width=900,
+                    height=650,
+                    width=900,
                     margin=dict(l=200, r=40, t=80, b=120),
                     title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
                 )
 
                 st.plotly_chart(fig, use_container_width=True)
 
-                # 回帰式と相関係数
                 st.subheader(f"回帰式: y = {slope:.2f}x + {intercept:.2f}")
                 st.write(f"相関係数: {corr:.2f} （{corr_desc}）")
