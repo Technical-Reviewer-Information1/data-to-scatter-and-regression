@@ -141,5 +141,5 @@ if df is not None:
 
                 st.subheader(f'回帰式： y = {slope:.2f}x + {intercept:.2f}')
                 st.write(f'{y_var} = {slope:.2f} × {x_var} + {intercept:.2f}')
-                st.subheader(f'相関係数： {corr_coef:.2f}')
-                st.write(f"{y_var} と {x_var} の間には、{corr_desc}（r = {corr_coef:.2f}）があります。")
+                st.subheader(f'相関係数： {corr:.2f}')
+                st.write(f"{y_var} と {x_var} の間には、{corr_desc}（r = {corr:.2f}）があります。")
