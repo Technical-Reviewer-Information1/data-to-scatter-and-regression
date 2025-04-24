@@ -83,7 +83,7 @@ if df is not None:
                 fig = make_subplots(
                     rows=2, cols=2,
                     row_heights=[0.8, 0.2],
-                    column_widths=[0.15, 0.85],  # ← 左を15%、右を85%
+                    column_widths=[0.1, 0.9],  # ← 左を15%、右を85%
                     specs=[
                         [{"type":"box"}, {"type":"scatter"}],
                         [None,             {"type":"box"}]
@@ -126,15 +126,15 @@ if df is not None:
                 # 散布図側の軸タイトルを離す
                 fig.update_xaxes(title=x_var, title_standoff=40,
                                  row=1, col=2)
-                fig.update_yaxes(title=y_var, title_standoff=60,
+                fig.update_yaxes(title=y_var, title_standoff=120,
                                  row=1, col=2)
 
                 # レイアウト調整
                 fig.update_layout(
                     height=650,
                     width=900,
-                    margin=dict(l=200, r=40, t=80, b=120),
-                    title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
+                    margin=dict(l=240, r=40, t=80, b=120),
+                    title_text=f"{y_var} と {x_var} の関係"
                 )
 
                 st.plotly_chart(fig, use_container_width=True)
