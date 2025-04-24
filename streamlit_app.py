@@ -4,9 +4,9 @@ import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="散布図と回帰直線＋箱ひげ図", layout="wide")
+st.set_page_config(page_title="散布図と回帰直線", layout="wide")
 
-st.title("散布図と回帰直線＋箱ひげ図")
+st.title("散布図と回帰直線")
 st.caption("Created by 技術評論社")
 st.write("ExcelまたはCSVファイルをアップロードしてください。")
 st.write("2つの変数の散布図を作成し、回帰直線を引き、マージナル箱ひげ図を表示します。")
@@ -140,6 +140,6 @@ if df is not None:
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.subheader(f'回帰式： y = {slope:.2f}x + {intercept:.2f}')
-                st.write(f'回帰式（解釈）：{y_var} = {slope:.2f} × {x_var} + {intercept:.2f}')
+                st.write(f'{y_var} = {slope:.2f} × {x_var} + {intercept:.2f}')
                 st.subheader(f'相関係数： {corr:.2f}')
                 st.write(f"「{y_var}」 と 「{x_var}」 の間には、{corr_desc}があります。（r = {corr:.2f}）")
