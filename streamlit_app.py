@@ -62,11 +62,11 @@ if df is not None:
                 x = data[x_var]
                 y = data[y_var]
 
-                # 回帰直線
+                # 回帰直線の計算
                 slope, intercept = np.polyfit(x, y, 1)
                 line = slope * x + intercept
 
-                # 相関係数
+                # 相関係数の計算
                 corr = x.corr(y)
                 abs_r = abs(corr)
                 if abs_r >= 0.9:
@@ -86,7 +86,7 @@ if df is not None:
                 fig = make_subplots(
                     rows=2, cols=2,
                     row_heights=[0.75, 0.25],       # 下段を小さく
-                    column_widths=[0.2, 0.8],
+                    column_widths=[0.25, 0.75],     # 左列を広げて間隔を確保
                     specs=[
                         [{"type":"box"},   {"type":"scatter"}],
                         [None,             {"type":"box"}]
@@ -129,6 +129,8 @@ if df is not None:
                         zeroline=False, showline=False,
                         row=r, col=c
                     )
+                # 左上のY箱ひげ図のタイトルも消去
+                fig.update_yaxes(title_text='', row=1, col=1)
 
                 # ─── 散布図側の軸タイトルを離す ───
                 fig.update_xaxes(
@@ -143,7 +145,7 @@ if df is not None:
                 # ─── レイアウト調整 ───
                 fig.update_layout(
                     height=650, width=900,
-                    margin=dict(l=120, r=40, t=80, b=120),
+                    margin=dict(l=160, r=40, t=80, b=120),
                     title_text=f"{y_var} vs {x_var} （マージナル箱ひげ図付き）"
                 )
 
