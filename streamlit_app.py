@@ -95,7 +95,7 @@ if df is not None:
                     st.plotly_chart(fig)
 
                     # 回帰式と相関係数の表示
-                    st.write(f'回帰式: **y = {slope:.2f} × x + {intercept:.2f}**')
+                    st.write(f'回帰式: **y = {slope:.2f}ax + {intercept:.2f}**')
                     st.write(f'回帰式（解釈）: **{y_var} = {slope:.2f} × {x_var} + {intercept:.2f}**')
                     st.write(f'相関係数: **{corr_coef:.2f}**')
         else:
