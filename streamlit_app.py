@@ -136,6 +136,11 @@ if df is not None:
                     margin=dict(l=80, r=40, t=80, b=120),
                     title_text=f"{y_var} と {x_var} の関係"
                 )
+                
+                # X軸（下段）の整数表示
+                fig.update_xaxes(tickformat=',.0f', row=2, col=2)
+                # Y軸（上段）の整数表示
+                fig.update_yaxes(tickformat=',.0f', row=1, col=2)
 
                 st.plotly_chart(fig, use_container_width=True)
 
