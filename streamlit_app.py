@@ -138,9 +138,9 @@ if df is not None:
                 )
                 
                 # X軸（下段）の整数表示
-                fig.update_xaxes(tickformat=',.0f', row=2, col=2)
+                fig.update_xaxes(tickformat=',.0f')
                 # Y軸（上段）の整数表示
-                fig.update_yaxes(tickformat=',.0f', row=1, col=2)
+                fig.update_yaxes(tickformat=',.0f')
 
                 st.plotly_chart(fig, use_container_width=True)
 
