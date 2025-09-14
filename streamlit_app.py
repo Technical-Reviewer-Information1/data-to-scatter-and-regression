@@ -9,9 +9,10 @@ st.set_page_config(page_title="散布図と回帰直線", layout="wide")
 st.title("散布図と回帰直線")
 st.caption("Created by Dit-Lab.(Daiki ITO)")
 st.caption("Supported by Tomoaki ATSUMI")
-st.write("ExcelまたはCSVファイルをアップロードしてください。")
 st.write("2つの変数の散布図を作成し、回帰直線を引き、マージナル箱ひげ図を表示します。")
+
 st.write("")
+st.write("ExcelまたはCSVファイルをアップロードしてください。")
 
 uploaded_file = st.file_uploader(
     "ファイルをアップロードしてください (Excel or CSV)",
