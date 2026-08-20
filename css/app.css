@@ -1,0 +1,21 @@
+.qhead{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px}
+.card-q{border:1px solid var(--rule); background:var(--paper); padding:18px; margin-bottom:14px}
+.q-scene{font-size:1rem; font-weight:700; line-height:1.9}
+.choice4{display:grid; gap:8px; grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.choice4 .btn.correct{background:var(--ok-bg); border-color:var(--ok); color:var(--ok)}
+.choice4 .btn.wrong{background:var(--ng-bg); border-color:var(--ng); color:var(--ng)}
+.choice4.locked{pointer-events:none}
+input[type=range]{width:100%; accent-color:var(--accent); height:34px}
+#fitBox, #sqBox2{border:1px solid var(--rule); background:var(--paper)}
+#fitBox svg, #sqBox2 svg{display:block}
+.eq{font-family:var(--mono); font-size:1.15rem; font-weight:700; text-align:center; padding:10px;
+  border:1px solid var(--rule); background:var(--paper-2)}
+.rss{font-family:var(--mono); font-size:1.9rem; font-weight:700; line-height:1.25}
+.rssbar{height:16px; background:var(--rule-2); margin-top:6px; overflow:hidden}
+.rssbar i{display:block; height:100%; background:var(--ng); width:0; transition:width .25s ease}
+.rssbar i.best{background:var(--ok)}
+.why{font-size:.85rem; color:var(--ink-2); line-height:1.85}
+#predTable td{font-family:var(--mono)}
+.sel{width:100%; font-family:inherit; font-size:.95rem; padding:9px 11px; min-height:42px;
+  border:1px solid var(--ink-3); border-radius:2px; background:var(--paper); color:var(--ink)}
+#myTable td{font-family:var(--mono)}

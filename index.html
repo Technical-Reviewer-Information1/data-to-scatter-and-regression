@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>散布図と単回帰分析｜情報Ⅰ共通テスト対策問題集</title>
+<meta name="description" content="回帰直線とは「はずれ具合の2乗の合計がいちばん小さくなる直線」です。自分で直線を動かして、最小二乗法と勝負してみましょう。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%2315181c%22/%3E%3Ctext x=%2216%22 y=%2222%22 font-size=%2218%22 font-family=%22monospace%22 fill=%22%23fff%22 text-anchor=%22middle%22%3E01%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="inner">
+    <span class="eyebrow">第 1 章　データの活用　1-10</span>
+    <h1>散布図と単回帰分析（pp.34-38）</h1>
+    <p class="lead">回帰直線とは「はずれ具合の2乗の合計がいちばん小さくなる直線」です。自分で直線を動かして、最小二乗法と勝負してみましょう。</p>
+    <p class="credit">Created by Dit-Lab.(Daiki ITO)　/　Supported by Tomoaki ATSUMI</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="step" id="step1">
+    <h2><span class="no">STEP 1</span>自分で直線を引いてみる</h2>
+    <p class="desc">1日の学習時間と小テストの点数のデータです。2本のスライダーで直線を動かし、<strong>赤い縦線（はずれ）をできるだけ短く</strong>してください。</p>
+
+    <div class="grid c2">
+      <div>
+        <div id="fitBox"></div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn sm" data-data="study">学習時間と点数</button>
+          <button class="btn sm" data-data="temp">気温とアイスの売上</button>
+          <button class="btn sm" data-data="weak">関係がうすい例</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>直線の式</h3>
+        <div class="eq" id="eqNow">y = 1.00x + 0.0</div>
+
+        <label class="fld" style="margin-top:14px" for="slope">傾き a：<span class="mono" id="slopeV">1.00</span></label>
+        <input type="range" id="slope" min="-3" max="12" step="0.05" value="1">
+        <label class="fld" style="margin-top:8px" for="intercept">切片 b：<span class="mono" id="interceptV">0</span></label>
+        <input type="range" id="intercept" min="-20" max="90" step="1" value="0">
+
+        <div style="margin-top:16px">
+          <div class="k" style="font-size:.76rem;color:var(--ink-3);font-weight:700">はずれの2乗の合計（残差平方和）</div>
+          <div class="rss" id="rssVal">—</div>
+          <div class="rssbar"><i id="rssBar"></i></div>
+        </div>
+        <div class="note" id="fitNote" style="margin-top:14px"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn primary" id="showBest">最小二乗法の答えを見る</button>
+          <button class="btn ghost" id="resetFit">やり直す</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2><span class="no">STEP 2</span>なぜ「2乗」なのか</h2>
+    <p class="desc">はずれをそのまま足すと、プラスとマイナスが打ち消しあってしまいます。だから2乗して面積にします。</p>
+    <div class="grid c2">
+      <div class="panel">
+        <h3>はずれを1辺とする正方形</h3>
+        <div id="sqBox2"></div>
+        <p class="why" style="margin-top:8px">この<strong>正方形の面積の合計がいちばん小さくなる直線</strong>が回帰直線です。これを<span class="term" data-t="最小二乗法">最小二乗法</span>といいます。</p>
+      </div>
+      <div class="panel">
+        <h3>いまの直線の成績</h3>
+        <div class="metrics">
+          <div class="metric"><div class="k">はずれの合計（そのまま）</div><div class="v" id="sumRes">—</div></div>
+          <div class="metric"><div class="k">はずれの2乗の合計</div><div class="v" id="sumSq">—</div></div>
+        </div>
+        <div class="metrics" style="margin-top:2px">
+          <div class="metric"><div class="k">最小二乗法の答え</div><div class="v" id="bestSq">—</div><div class="s">これより小さくはできません</div></div>
+          <div class="metric"><div class="k">あなたとの差</div><div class="v" id="gapSq">—</div></div>
+        </div>
+        <div class="note info" style="margin-top:14px">
+          回帰直線は必ず<strong>（xの平均, yの平均）を通ります</strong>。図の橙色の点がその位置です。覚えておくと計算問題で役に立ちます。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="step3">
+    <h2><span class="no">STEP 3</span>回帰式で予測する</h2>
+    <p class="desc">回帰式に x を入れれば y の予想が出ます。ただし<strong>データの範囲の外</strong>ではあてになりません。</p>
+    <div class="panel">
+      <label class="fld" for="predX">x の値：<span class="mono" id="predXv"></span></label>
+      <input type="range" id="predX" min="0" max="20" step="0.5" value="5">
+      <div class="eq" id="predEq" style="margin-top:12px"></div>
+      <div class="note" id="predNote" style="margin-top:12px"></div>
+      <div class="tbl-scroll" style="margin-top:14px">
+        <table class="tbl" id="predTable">
+          <thead><tr><th>#</th><th>x</th><th>実際の y</th><th>予測 ŷ</th><th>はずれ y−ŷ</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2><span class="no">STEP 4</span>あてはまりのよさを数字にする</h2>
+    <p class="desc"><span class="term" data-t="決定係数">決定係数</span> R² は「y のばらつきのうち、どれだけを直線で説明できたか」の割合です。</p>
+    <div class="panel">
+      <div class="metrics">
+        <div class="metric"><div class="k">相関係数 r</div><div class="v" id="mR">—</div></div>
+        <div class="metric"><div class="k">決定係数 R²</div><div class="v" id="mR2">—</div></div>
+        <div class="metric"><div class="k">説明できた割合</div><div class="v" id="mPct">—</div></div>
+      </div>
+      <div id="r2Chart" style="margin-top:14px"></div>
+      <div class="note" id="r2Note" style="margin-top:12px"></div>
+      <p class="why" style="margin-top:10px">
+        単回帰では <span class="mono">R² ＝ r²</span> の関係があります。r が ±0.8 なら R² は 0.64、つまり約64％を説明できたことになります。
+      </p>
+    </div>
+  </section>
+
+  <section class="step" id="step5">
+    <h2><span class="no">STEP 5</span>確認クイズ</h2>
+    <div class="panel">
+      <div class="qhead">
+        <span class="badge" id="qProgress">1 / 1</span>
+        <span class="badge">正解 <span class="score" id="qScore">0</span></span>
+      </div>
+      <div class="card-q"><div class="q-scene" id="qText"></div></div>
+      <div class="choice4" id="qChoices"></div>
+      <div class="note" id="qFb" hidden style="margin-top:12px"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn primary" id="qNext" disabled>次の問題</button>
+        <button class="btn ghost" id="qReset">最初から</button>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="step" id="step6">
+    <h2><span class="no">STEP 6</span>自分のデータで回帰直線を求める</h2>
+    <p class="desc">Excelファイル（.xlsx）やCSVを読み込むか、表に直接入力してください。2つの列をえらぶと、散布図・回帰直線・残差まで計算します。</p>
+    <div class="panel">
+      <div id="dataInput"></div>
+      <div class="grid c2" style="margin-top:16px">
+        <div><label class="fld" for="mx">横軸 x に使う列</label><select id="mx" class="sel"></select></div>
+        <div><label class="fld" for="my">縦軸 y に使う列</label><select id="my" class="sel"></select></div>
+      </div>
+      <div class="btn-row" style="margin-top:12px"><button class="btn primary" id="calcMine">計算する</button></div>
+      <div class="note" id="myNote" hidden style="margin-top:12px"></div>
+      <div class="metrics" id="myStats" style="margin-top:12px"></div>
+      <div class="grid c2" style="margin-top:14px">
+        <div id="myChart"></div>
+        <div>
+          <div class="eq" id="myEq" style="margin-bottom:10px"></div>
+          <div class="tbl-scroll" style="max-height:320px;overflow:auto"><table class="tbl" id="myTable"></table></div>
+        </div>
+      </div>
+      <div class="toolbar" id="myTools"></div>
+    </div>
+  </section>
+
+  <section class="step" id="glossary">
+    <h2><span class="no">用語</span>この節で出てくることば</h2>
+    <div id="glossBox"></div>
+  </section>
+
+  <section class="step">
+    <h2><span class="no">まとめ</span>回帰直線のポイント</h2>
+    <ul style="margin:0;padding-left:1.2em;color:var(--ink-2);font-size:.92rem;line-height:2.05">
+      <li>回帰直線は<strong>はずれの2乗の合計が最小</strong >になるように決めます（最小二乗法）。</li>
+      <li>必ず<strong>（x̄, ȳ）を通ります</strong>。</li>
+      <li>傾き a は「x が1増えると y がどれだけ増えるか」。<strong>単位がつきます</strong>。</li>
+      <li>決定係数 <span class="mono">R² ＝ r²</span>。1に近いほどよくあてはまっています。</li>
+      <li><strong>データの範囲の外を予測してはいけません</strong>（外挿）。関係が同じとは限らないからです。</li>
+      <li>あてはまりがよくても<strong>因果関係の証拠にはなりません</strong>。</li>
+    </ul>
+  </section>
+
+  <section class="step">
+    <h2><span class="no">活用</span>授業・探究での使い方</h2>
+    <div class="use-note">
+      <h3>授業で</h3>
+      <ul>
+        <li>STEP 1 で生徒に「いちばん小さい残差平方和」を競わせ、そのあと最小二乗法の答えと比べる。</li>
+        <li>STEP 3 で範囲外のxを入れて、外挿がなぜ危険かを実感させる。</li>
+        <li>STEP 4 の R² は、r との関係（R²＝r²）を確認するのに使う。</li>
+      </ul>
+      <h3 style="margin-top:12px">探究で</h3>
+      <ul>
+        <li>STEP 6 に自分たちのデータを読み込み、2つの変数の回帰直線と決定係数を求める。</li>
+        <li>残差が大きいデータ点を特定し、なぜそこだけ外れるのかを考える。</li>
+        <li>予測に使ってよい範囲（データのある範囲）を明示したうえでレポートにまとめる。</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  情報Ⅰ 共通テスト対策問題集（技術評論社）連動Webアプリ　/　Created by Dit-Lab.(Daiki ITO)　/　Supported by Tomoaki ATSUMI
+</footer>
+
+<script src="js/tools.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/grid.js"></script>
+<script src="js/xlsx.js"></script>
+<script src="js/datainput.js"></script>
+<script src="js/terms.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
