@@ -315,6 +315,12 @@
     $('myTools').appendChild(pr);
   }
 
+  /* 本文の問題 */
+  function drawBook() {
+    if (!document.getElementById('bookBox')) return;
+    window.Quiz.choice('bookBox', 'bookNote', [{"k": "ア", "q": "スポーツ年間行動率が10.0%のとき、1人あたりの国民医療費はおよそいくらか。", "ch": ["12円", "1.2万円", "410円", "41万円"], "a": 3, "why": "グラフの縦軸の<strong>単位は「千円」</strong>。回帰直線から読むと約410（千円）なので、<strong>41万円</strong>です。単位の見落としに注意。"}, {"k": "イ", "q": "図2・図3から<strong>読み取ることができない</strong>ものは。", "ch": ["通勤・通学時間が長くなると、睡眠時間およびスポーツ時間のいずれも短くなる傾向がある", "通勤・通学時間を短縮することで、睡眠時間やスポーツ時間の確保が期待できると考えられる", "通勤・通学時間が60分から80分に増加したとき、睡眠時間とスポーツ時間の差は約5分になると推測できる", "通勤・通学時間が30分増えると、スポーツ時間は睡眠時間よりも大きく減少する"], "a": 3, "why": "2本の回帰直線の<strong>傾きの大きさを比べる</strong>と、睡眠時間のほうが大きく減っています。したがって③は図から読み取れません。"}], "本文の答えは【ア】③　【イ】③ です。");
+  }
+
   function init() {
     $('slope').addEventListener('input', e => { a = +e.target.value; drawFit(); });
     $('intercept').addEventListener('input', e => { b = +e.target.value; drawFit(); });
@@ -344,6 +350,7 @@
     window.Terms.glossary($('glossBox'), ['散布図', '回帰直線', '最小二乗法', '残差', '決定係数', '相関係数', '外挿', '因果関係']);
     setData('study'); startQuiz();
     refreshCols(grid.getData(), grid.getHeader());
+    drawBook();
     window.Terms.attach();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
