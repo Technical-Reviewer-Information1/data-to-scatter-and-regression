@@ -4,9 +4,10 @@
  "pp": "pp.34-38",
  "lead": "回帰直線とは「はずれ具合の2乗の合計がいちばん小さくなる直線」です。自分で直線を動かして、最小二乗法と勝負してみましょう。",
  "scripts": [
+  "tools.js",
   "chart.js",
-  "grid.js",
   "xlsx.js",
+  "grid.js",
   "datainput.js",
   "terms.js",
   "quiz.js",
